@@ -5,6 +5,7 @@ import com.example.application.components.appnav.AppNavItem;
 import com.example.application.data.entity.User;
 import com.example.application.security.AuthenticatedUser;
 import com.example.application.views.imagelist.ImageListView;
+import com.example.application.views.merititementry.MeritItemEntryFormView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.avatar.Avatar;
@@ -18,12 +19,18 @@ import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import java.io.ByteArrayInputStream;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static com.example.application.common.Definitions.*;
 
 /**
  * The main view is a top-level placeholder for other views.
@@ -55,7 +62,7 @@ public class MainLayout extends AppLayout {
     }
 
     private void addDrawerContent() {
-        H1 appName = new H1("My App");
+        H1 appName = new H1(TEXT_PIN_POTHA);
         appName.addClassNames(LumoUtility.FontSize.LARGE, LumoUtility.Margin.NONE);
         Header header = new Header(appName);
 
@@ -70,8 +77,11 @@ public class MainLayout extends AppLayout {
         AppNav nav = new AppNav();
 
         if (accessChecker.hasAccess(ImageListView.class)) {
-            nav.addItem(new AppNavItem("Image List", ImageListView.class, "la la-th-list"));
+            nav.addItem(new AppNavItem(TEXT_MERITS, ImageListView.class, "la la-th-list"));
+        }
 
+        if (accessChecker.hasAccess(MeritItemEntryFormView.class)) {
+            nav.addItem(new AppNavItem(PAGE_TITLE_ADD, MeritItemEntryFormView.class, "la la-th-list"));
         }
 
         return nav;
@@ -123,7 +133,19 @@ public class MainLayout extends AppLayout {
     }
 
     private String getCurrentPageTitle() {
+        String pageTitle = "";
         PageTitle title = getContent().getClass().getAnnotation(PageTitle.class);
-        return title == null ? "" : title.value();
+
+        if(title != null) {
+            pageTitle = title.value();
+        } else {
+            Class<?>[] interfaces = getContent().getClass().getInterfaces();
+            if(Arrays.stream(interfaces)
+                    .filter(i -> i.getName().equals("com.vaadin.flow.router.HasDynamicTitle"))
+                    .collect(Collectors.toList()).stream().findAny().isPresent()) {
+                pageTitle = ((HasDynamicTitle)getContent()).getPageTitle();
+            }
+        }
+        return pageTitle;
     }
 }

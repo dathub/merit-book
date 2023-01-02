@@ -1,10 +1,18 @@
 package com.example.application.views.imagelist;
 
+import com.example.application.common.Definitions;
+import com.example.application.views.merititementry.MeritItemEntryFormView;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.ListItem;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.router.RouteParameters;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
 import com.vaadin.flow.theme.lumo.LumoUtility.Background;
 import com.vaadin.flow.theme.lumo.LumoUtility.BorderRadius;
@@ -16,44 +24,59 @@ import com.vaadin.flow.theme.lumo.LumoUtility.JustifyContent;
 import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
 import com.vaadin.flow.theme.lumo.LumoUtility.Overflow;
 import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 import com.vaadin.flow.theme.lumo.LumoUtility.Width;
 
 public class ImageListViewCard extends ListItem {
 
-    public ImageListViewCard(String text, String url) {
+    private Long id;
+    private String title;
+    private String date;
+    private String description;
+    private Image image;
+
+    public ImageListViewCard(Long id, String sTitle, String sDate, String sDescription, Image sImage) {
+        this.id = id;
+        this.title = sTitle;
+        this.date = sDate;
+        this.description = sDescription;
+        this.image = sImage;
+
         addClassNames(Background.CONTRAST_5, Display.FLEX, FlexDirection.COLUMN, AlignItems.START, Padding.MEDIUM,
                 BorderRadius.LARGE);
 
-        Div div = new Div();
-        div.addClassNames(Background.CONTRAST, Display.FLEX, AlignItems.CENTER, JustifyContent.CENTER,
+        Div imageDiv = new Div();
+        imageDiv.addClassNames(Background.CONTRAST, Display.FLEX, AlignItems.CENTER, JustifyContent.CENTER,
                 Margin.Bottom.MEDIUM, Overflow.HIDDEN, BorderRadius.MEDIUM, Width.FULL);
-        div.setHeight("160px");
+        imageDiv.setHeight("160px");
 
-        Image image = new Image();
         image.setWidth("100%");
-        image.setSrc(url);
-        image.setAlt(text);
+        imageDiv.add(image);
 
-        div.add(image);
+        Span titleBar = new Span();
+        titleBar.addClassNames(FontSize.XLARGE, FontWeight.SEMIBOLD);
+        titleBar.setText(title);
 
-        Span header = new Span();
-        header.addClassNames(FontSize.XLARGE, FontWeight.SEMIBOLD);
-        header.setText("Title");
+        Span dateBar = new Span();
+        dateBar.addClassNames(FontSize.MEDIUM, FontWeight.LIGHT);
+        dateBar.setText(date);
 
-        Span subtitle = new Span();
-        subtitle.addClassNames(FontSize.SMALL, TextColor.SECONDARY);
-        subtitle.setText("Card subtitle");
+        Paragraph descriptionBar = new Paragraph();
+        descriptionBar.addClassName(Margin.Vertical.MEDIUM);
+        descriptionBar.setText(description);
 
-        Paragraph description = new Paragraph(
-                "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.");
-        description.addClassName(Margin.Vertical.MEDIUM);
+        Button editButton = new Button();
+        editButton.setIcon(VaadinIcon.EDIT.create());
 
-        Span badge = new Span();
-        badge.getElement().setAttribute("theme", "badge");
-        badge.setText("Label");
+        editButton.addClickListener(e -> {
+            UI.getCurrent().navigate(MeritItemEntryFormView.class);
+        });
 
-        add(div, header, subtitle, description, badge);
+        RouteParameters routeParameters = new RouteParameters(Definitions.URL_PARAM_MERIT_ITEM_ID, id.toString());
+        Icon vaadinIcon = new Icon(VaadinIcon.EDIT);
+        RouterLink editLink = new RouterLink(MeritItemEntryFormView.class, routeParameters);
+        editLink.add(vaadinIcon);
 
+        add(imageDiv, titleBar, dateBar, descriptionBar, editLink);
     }
+
 }
